@@ -1,13 +1,14 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.0
+import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
 
 ApplicationWindow {
     id: mainWinow
     visible: true
-    width: 640
-    height: 480
+    width: 300
+    height: 200
     title: qsTr("Регистрация и вход")
 
     StackLayout {
@@ -16,6 +17,7 @@ ApplicationWindow {
         currentIndex: 6
 
         Page1 {
+            id: page1
         }
 
         Page2 {

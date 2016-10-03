@@ -9,7 +9,7 @@ SOURCES += main.cpp \
 
 RESOURCES += qml.qrc
 INCLUDEPATH += D:/OpenSSL-Win32/include
-LIBS += -LD:/OpenSSL-Win32/lib/MinGW -lssl-1_1 -lcrypto-1_1
+LIBS += -LD:/OpenSSL-Win32/lib -llibssl -llibcrypto
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =

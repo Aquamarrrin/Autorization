@@ -7,6 +7,7 @@ AccountInfoForm {
         stackLayout.currentIndex = 0
         tabBar.visible = true
         tabBar.currentIndex = 0
+        page1.password.text = ""
     }
 
     buttonChange.onClicked: {

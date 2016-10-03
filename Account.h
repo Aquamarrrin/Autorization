@@ -4,6 +4,7 @@
 #include <QDataStream>
 #include <QString>
 #include <QCryptographicHash>
+#include <QDebug>
 
 class Account
 {
@@ -17,7 +18,7 @@ public:
     QString getLogin() const;
     void setLogin(const QString &Login);
 
-    QByteArray getPassword() const;
+    QString getPassword() const;
     void setPassword(const QString &Password);
 
     QString getEmail() const;

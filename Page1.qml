@@ -13,6 +13,7 @@ Page1Form {
             accountAdminInfo.login.text = DB.getCurrentLogin()
             accountAdminInfo.email.text = DB.getCurrentEmail()
             popup.open()
+            mainWinow.height = 300
         }
         else if(login.text.length  > 0
                 && DB.tryToLogIn(login.text, password.text))

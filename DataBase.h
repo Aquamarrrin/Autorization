@@ -26,10 +26,14 @@ private:
     QMap<QString, Account> m_Accounts;
     QFile m_BaseFile;
     QString m_CurrentLogin;
-    QString m_Key;
+    QByteArray m_QByteArrKey;
+    quint64 m_QuintKey;
 
     bool SaveBase(); // Сохраняем базу
-    bool LoadBase(QString aKey); // Сохраняем базу
+    bool LoadBase(QByteArray aKey); // Сохраняем базу
+
+    QString encrypt(const QString aPlainText);
+    QString decrypt(const QString aCipherText, QByteArray aKey);
 
 signals:
 public slots:

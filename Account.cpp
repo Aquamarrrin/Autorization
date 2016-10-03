@@ -24,9 +24,9 @@ void Account::setLogin(const QString &Login)
     m_Login = Login;
 }
 
-QByteArray Account::getPassword() const
+QString Account::getPassword() const
 {
-    return m_PasswordHash;
+    return m_Password;
 }
 
 void Account::setPassword(const QString &Password)
@@ -57,7 +57,10 @@ void Account::setSalt(const QString &Salt)
 
 bool Account::comparePasswords(QString aComparablePassword)
 {
-    return m_PasswordHash == encryptPassword(aComparablePassword);
+    //return m_PasswordHash == encryptPassword(aComparablePassword);
+    qDebug()<<m_Password;
+    qDebug()<<aComparablePassword;
+    return m_Password == aComparablePassword;
 }
 
 bool Account::getSpec() const
@@ -86,7 +89,7 @@ QDataStream& operator<<( QDataStream& aDataStream, const Account& aAccount ) {
 }
 
 QDataStream& operator>>( QDataStream& aDataStream, Account& aAccount ) {
-    aDataStream >> aAccount.m_Login >> aAccount.m_PasswordHash >> aAccount.m_Email >> aAccount.m_Spec >> aAccount.m_Ban;
+    aDataStream >> aAccount.m_Login >> aAccount.m_Password >> aAccount.m_Email >> aAccount.m_Spec >> aAccount.m_Ban;
     return aDataStream;
 }
 

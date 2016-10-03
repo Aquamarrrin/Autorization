@@ -1,12 +1,13 @@
 #include "DataBase.h"
-#include <QDebug>
+
 #include <openssl/aes.h>
 
 static QString const kBaseFileName = "database.bin";
 
 DataBase::DataBase(QObject *parent) :
-    QObject(parent), m_CurrentLogin(""), m_Key("paragon")
+    QObject(parent), m_CurrentLogin(""), m_QByteArrKey("paragon")
 {
+    m_QuintKey = *(reinterpret_cast< const quint64* >(m_QByteArrKey.toHex().data()));
     m_BaseFile.setFileName(kBaseFileName);
 }
 
@@ -14,7 +15,7 @@ DataBase::~DataBase()
 {
 }
 
-bool DataBase::LoadBase(QString aKey)
+bool DataBase::LoadBase(QByteArray aKey)
 {
     bool result = false;
     QDataStream data_stream(&m_BaseFile);
@@ -30,13 +31,16 @@ bool DataBase::LoadBase(QString aKey)
         qDebug()<<"LOAD!";
 
         Account new_account("", "", "");
-        new_account.setLogin(decrypt(account.getLogin()));
-        new_account.setPassword(decrypt(account.getPassword()));
-        new_account.setEmail(decrypt(account.getEmail()));
+        new_account.setLogin(decrypt(account.getLogin(), aKey));
+        new_account.setPassword(decrypt(account.getPassword(), aKey));
+        new_account.setEmail(decrypt(account.getEmail(), aKey));
+        new_account.setSpec(decrypt(QString::number(account.getSpec()), aKey).toInt());
+        new_account.setBan(decrypt(QString::number(account.getBan()), aKey).toInt());
 
-        new_accounts[account.getLogin()] = new_account;
+        new_accounts[new_account.getLogin()] = new_account;
+        qDebug()<<new_account.getLogin() << account.getLogin();
+        qDebug()<<new_account.getSpec() << account.getSpec();
     }
-
     m_Accounts.swap(new_accounts);
     if (m_Accounts.count("ADMIN"))
     {
@@ -67,11 +71,13 @@ bool DataBase::SaveBase()
         qDebug()<<"SAVE!";
 
         Account new_account("", "", "");
-        new_account.setLogin(SimpleCrypt::encrypt(account.getLogin()));
+        new_account.setLogin(encrypt(account.getLogin()));
         new_account.setPassword(encrypt(account.getPassword()));
         new_account.setEmail(encrypt(account.getEmail()));
+        new_account.setSpec(encrypt(QString::number(account.getSpec())).toInt());
+        new_account.setBan(encrypt(QString::number(account.getBan())).toInt());
 
-        new_accounts[account.getLogin()] = new_account;
+        new_accounts[new_account.getLogin()] = new_account;
     }
     data_stream << new_accounts;
     m_BaseFile.close();
@@ -79,12 +85,28 @@ bool DataBase::SaveBase()
     return result;
 }
 
+QString DataBase::encrypt(const QString aPlainText)
+{
+    SimpleCrypt sc(m_QuintKey);
+    sc.setIntegrityProtectionMode(SimpleCrypt::ProtectionHash);
+    QString cipherText = sc.encryptToString(aPlainText);
+    return cipherText;
+}
+
+QString DataBase::decrypt(const QString aCipherText, QByteArray aKey)
+{
+    quint64 key = *(reinterpret_cast< const quint64* >(aKey.toHex().data()));
+    SimpleCrypt sc(key);
+    sc.setIntegrityProtectionMode(SimpleCrypt::ProtectionHash);
+    QString plainText = sc.decryptToString(aCipherText);
+    return plainText;
+}
 
 // SLOTS:
 
 bool DataBase::tryToOpenBase(QVariant aBasePassword)
 {
-    bool result = LoadBase(m_Key);
+    bool result = LoadBase(aBasePassword.toByteArray());
 
     return result;
 }
@@ -94,6 +116,7 @@ bool DataBase::addAccountToBase(QVariant aLogin, QVariant aPassword, QVariant aE
     Account account(aLogin.toString(), aPassword.toString(), aEmail.toString());
     m_Accounts[aLogin.toString()] = account;
     SaveBase();
+    return true;
 }
 
 bool DataBase::isAlreadyExist(QVariant aLogin)
